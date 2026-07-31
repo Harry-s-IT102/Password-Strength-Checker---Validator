@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Week 4 Assignment: Password Validator</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 2rem; background: #f4f4f9; display: flex; justify-content: center; }
+        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .form-group { margin-bottom: 1.25rem; }
+        label { display: block; margin-bottom: 0.25rem; font-weight: 500; }
+        input { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1rem; }
+        
+        .strength-container { margin: 0.5rem 0 1rem 0; }
+        .strength-text { font-weight: bold; }
+        .strength-bar { height: 6px; width: 100%; background: #e9ecef; border-radius: 3px; margin-top: 0.25rem; position: relative; }
+        .strength-fill { height: 100%; width: 0%; border-radius: 3px; transition: width 0.3s, background-color 0.3s; }
+        
+        .checklist { list-style: none; padding: 0; margin: 0.5rem 0; font-size: 0.9rem; }
+        .checklist li { margin-bottom: 0.25rem; color: #dc3545; }
+        .checklist li.valid { color: #28a745; }
+        
+        .match-feedback { font-weight: 600; font-size: 0.95rem; margin-top: 0.5rem; }
+        .text-danger { color: #dc3545; }
+        .text-success { color: #28a745; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Create Account</h2>
+        
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="Enter password">
+            
+            <div class="strength-container">
+                <span>Strength: <span id="strengthText" class="strength-text">Empty</span></span>
+                <div class="strength-bar"><div id="strengthFill" class="strength-fill"></div></div>
+            </div>
+
+            <ul class="checklist">
+                <li id="ruleLength">✖ At least 8 characters</li>
+                <li id="ruleNumber">✖ Contains a number (0-9)</li>
+                <li id="ruleSpecial">✖ Contains a special character (!@#$%^&*)</li>
+            </ul>
+        </div>
+        
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" placeholder="Re-enter password">
+            <div id="matchResult" class="match-feedback"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Element Selection ---
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const ruleLengthEl = document.getElementById('ruleLength');
+        const ruleNumberEl = document.getElementById('ruleNumber');
+        const ruleSpecialEl = document.getElementById('ruleSpecial');
+        const strengthTextEl = document.getElementById('strengthText');
+        const strengthFillEl = document.getElementById('strengthFill');
+        const matchResultEl = document.getElementById('matchResult');
+
+        // --- Step 1: AI Generated Logic ---
+        function checkPasswordRules(passwordString) {
+            const result = {
+                hasMinLength: false,
+                hasNumber: false,
+                hasSpecial: false
+            };
+
+            // Rule 1: Check minimum length
+            if (passwordString.length >= 8) {
+                result.hasMinLength = true;
+            }
+
+            // Define characters to check against
+            const numbers = "0123456789";
+            const specials = "!@#$%^&*";
+
+            // Rules 2 & 3: Loop through string to check for numbers and specials
+            for (let i = 0; i < passwordString.length; i++) {
+                const char = passwordString[i];
+                
+                if (numbers.includes(char)) {
+                    result.hasNumber = true;
+                }
+                
+                if (specials.includes(char)) {
+                    result.hasSpecial = true;
+                }
+            }
+
+            return result;
+        }
+
+        // --- Step 2: Implement and Connect ---
+        function updateFormValidation() {
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // 1. Retrieve rule evaluation results
+            const rules = checkPasswordRules(password);
+            let passedCount = 0;
+
+            // Update Rule Visuals for Length
+            if (rules.hasMinLength) {
+                ruleLengthEl.textContent = "✓ At least 8 characters";
+                ruleLengthEl.classList.add("valid");
+                passedCount++;
+            } else {
+                ruleLengthEl.textContent = "✖ At least 8 characters";
+                ruleLengthEl.classList.remove("valid");
+            }
+
+            // Update Rule Visuals for Numbers
+            if (rules.hasNumber) {
+                ruleNumberEl.textContent = "✓ Contains a number (0-9)";
+                ruleNumberEl.classList.add("valid");
+                passedCount++;
+            } else {
+                ruleNumberEl.textContent = "✖ Contains a number (0-9)";
+                ruleNumberEl.classList.remove("valid");
+            }
+
+            // Update Rule Visuals for Specials
+            if (rules.hasSpecial) {
+                ruleSpecialEl.textContent = "✓ Contains a special character (!@#$%^&*)";
+                ruleSpecialEl.classList.add("valid");
+                passedCount++;
+            } else {
+                ruleSpecialEl.textContent = "✖ Contains a special character (!@#$%^&*)";
+                ruleSpecialEl.classList.remove("valid");
+            }
+
+            // 2. Determine Overall Strength Status
+            if (password === "") {
+                strengthTextEl.textContent = "Empty";
+                strengthFillEl.style.width = "0%";
+            } else if (passedCount <= 1) {
+                strengthTextEl.textContent = "Weak";
+                strengthFillEl.style.width = "33%";
+                strengthFillEl.style.backgroundColor = "#dc3545"; // Red
+            } else if (passedCount === 2) {
+                strengthTextEl.textContent = "Medium";
+                strengthFillEl.style.width = "66%";
+                strengthFillEl.style.backgroundColor = "#ffc107"; // Orange
+            } else if (passedCount === 3) {
+                strengthTextEl.textContent = "Strong";
+                strengthFillEl.style.width = "100%";
+                strengthFillEl.style.backgroundColor = "#28a745"; // Green
+            }
+
+// 3. Password Confirmation Match
+    // Edge case: if either field is completely empty, clear feedback
+    if (password === "" || confirmPassword === "") {
+        matchResultEl.textContent = "";
+        matchResultEl.className = "match-feedback";
+    } else if (password === confirmPassword) {
+        // NEW LOGIC: Check if the password is at least 8 characters before showing success
+        if (rules.hasMinLength) {
+            matchResultEl.textContent = "Passwords match!";
+            matchResultEl.className = "match-feedback text-success";
+        } else {
+            matchResultEl.textContent = "Passwords match, but password is too weak!";
+            matchResultEl.className = "match-feedback text-danger";
+        }
+    } else {
+        matchResultEl.textContent = "Passwords do not match";
+        matchResultEl.className = "match-feedback text-danger";
+    }
+        }
+
+        // Attach event listeners to trigger on every keystroke
+        passwordInput.addEventListener('input', updateFormValidation);
+        confirmPasswordInput.addEventListener('input', updateFormValidation);
+    </script>
+</body>
+</html>
