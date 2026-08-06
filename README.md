@@ -1,4 +1,4 @@
-# Week 4 Assignment: Password Validator
+Password Validator
 
 **Institution:** North Seattle College  
 **Term:** Summer 2026  
